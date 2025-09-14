@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* EvolvNFT Cyber-Foundry Design System - Dark futuristic theme with glowing accents */
+
+@layer base {
+  :root {
+    /* Core Background - Deep space dark */
+    --background: 210 15% 6%;
+    --foreground: 210 20% 95%;
+
+    /* Card & Surface - Glassmorphism effect */
+    --card: 210 15% 8%;
+    --card-foreground: 210 20% 95%;
+    --card-border: 210 20% 15%;
+
+    /* Popover & Modal surfaces */
+    --popover: 210 15% 8%;
+    --popover-foreground: 210 20% 95%;
+
+    /* Primary - Solar Flare Orange */
+    --primary: 30 100% 50%;
+    --primary-foreground: 210 15% 6%;
+    --primary-glow: 30 100% 60%;
+
+    /* Secondary - Electric Blue */
+    --secondary: 195 100% 50%;
+    --secondary-foreground: 210 15% 6%;
+    --secondary-glow: 195 100% 60%;
+
+    /* Muted elements */
+    --muted: 210 15% 12%;
+    --muted-foreground: 210 10% 65%;
+
+    /* Accent - Subtle highlights */
+    --accent: 210 20% 15%;
+    --accent-foreground: 210 20% 95%;
+
+    /* Destructive - Neon red */
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 210 20% 95%;
+
+    /* Borders & Inputs - Subtle glow */
+    --border: 210 20% 20%;
+    --input: 210 15% 10%;
+    --ring: 30 100% 50%;
+
+    /* Design system extensions */
+    --radius: 0.75rem;
+    --cyber-glow: 0 0 20px;
+    --living-pulse: 2s ease-in-out infinite alternate;
+  }
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(210 15% 4%) 100%);
+    min-height: 100vh;
+  }
+}
+
+/* Cyber Effects & Animations */
+@layer components {
+  .glass-card {
+    @apply bg-card/30 backdrop-blur-md border border-card-border/50 rounded-lg;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .cyber-glow {
+    box-shadow: var(--cyber-glow) hsl(var(--primary) / 0.3);
+  }
+  
+  .secondary-glow {
+    box-shadow: var(--cyber-glow) hsl(var(--secondary) / 0.3);
+  }
+  
+  .living-pulse {
+    animation: living-pulse var(--living-pulse);
+  }
+  
+  .forge-btn {
+    @apply bg-primary text-primary-foreground font-semibold py-4 px-8 rounded-lg transition-all duration-300;
+    @apply hover:scale-105 hover:shadow-lg;
+    box-shadow: 0 4px 20px hsl(var(--primary) / 0.4);
+  }
+  
+  .forge-btn:hover {
+    box-shadow: 0 6px 25px hsl(var(--primary) / 0.6);
+  }
+  
+  .connect-btn {
+    @apply bg-secondary text-secondary-foreground font-medium py-2 px-6 rounded-lg transition-all duration-300;
+    box-shadow: 0 2px 10px hsl(var(--secondary) / 0.3);
+  }
+  
+  .connect-btn:hover {
+    @apply scale-105;
+    box-shadow: 0 4px 15px hsl(var(--secondary) / 0.5);
+  }
+}
+
+/* Keyframes for cyber animations */
+@keyframes living-pulse {
+  0% {
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3);
+  }
+  100% {
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.8), 0 0 30px hsl(var(--primary) / 0.5);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

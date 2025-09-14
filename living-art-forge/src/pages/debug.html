@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Forge Diagnostics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
+        .gradient-text { background: linear-gradient(45deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card { background: rgba(17, 24, 39, 0.5); border: 1px solid rgba(75, 85, 99, 0.5); }
+        .btn-primary { background: linear-gradient(45deg, #3b82f6, #8b5cf6); }
+        .btn-primary:hover { background: linear-gradient(45deg, #2563eb, #7c3aed); }
+        .status-good { color: #34d399; }
+        .status-bad { color: #f87171; }
+        .status-warning { color: #fbbf24; }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4 gradient-text">NFT Forge Diagnostics</h1>
+            <p class="text-gray-400 text-lg">Debug your gasless minting setup</p>
+        </div>
+
+        <!-- Run Diagnostics Button -->
+        <div class="text-center mb-8">
+            <button id="runDiagnostics" class="btn-primary px-8 py-3 rounded-lg font-semibold transition-all duration-200">
+                Run Diagnostics
+            </button>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+            <p class="mt-2 text-gray-400">Running diagnostics...</p>
+        </div>
+
+        <!-- Error Display -->
+        <div id="errorContainer" class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-8 hidden">
+            <div class="flex items-center space-x-2">
+                <span class="text-red-400 font-semibold">Diagnostic Error</span>
+            </div>
+            <p id="errorMessage" class="text-red-300 mt-2"></p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="card rounded-lg p-6 hidden">
+            <h2 class="text-2xl font-bold mb-6">Diagnostic Results</h2>
+            <div id="results" class="grid gap-4"></div>
+            <div id="recommendations" class="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <h3 class="font-semibold text-blue-400 mb-2">Recommendations</h3>
+                <div id="recommendationsList" class="text-sm text-gray-300 space-y-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const RELAYER_URL = 'http://localhost:3001/relay-mint';
+        const NEW_CONTRACT_ADDRESS = "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799";
+        
+        const contractABI = [
+            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"mintFor","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"nonces","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}
+        ];
+
+        async function runDiagnostics() {
+            const loadingEl = document.getElementById('loading');
+            const errorContainer = document.getElementById('errorContainer');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            const results = document.getElementById('results');
+            const recommendationsList = document.getElementById('recommendationsList');
+
+            // Show loading, hide others
+            loadingEl.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            resultsContainer.classList.add('hidden');
+
+            try {
+                const debugInfo = {};
+                const recommendations = [];
+
+                // Step 1: Check wallet
+                if (!window.ethereum) {
+                    throw new Error('MetaMask not installed');
+                }
+
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                debugInfo.walletConnected = true;
+
+                // Step 2: Get user address
+                const signer = await provider.getSigner();
+                const address = await signer.getAddress();
+                debugInfo.userAddress = address;
+
+                // Step 3: Get network info
+                const network = await provider.getNetwork();
+                debugInfo.network = network.name || 'Unknown';
+                debugInfo.chainId = network.chainId.toString();
+
+                // Step 4: Check contract
+                const code = await provider.getCode(NEW_CONTRACT_ADDRESS);
+                debugInfo.contractExists = code !== '0x';
+                
+                if (debugInfo.contractExists) {
+                    const contract = new ethers.Contract(NEW_CONTRACT_ADDRESS, contractABI, provider);
+                    
+                    try {
+                        debugInfo.contractName = await contract.name();
+                        debugInfo.contractSymbol = await contract.symbol();
+                    } catch (e) {
+                        debugInfo.contractName = `Error: ${e.message}`;
+                        debugInfo.contractSymbol = 'N/A';
+                    }
+
+                    try {
+                        const nonce = await contract.nonces(address);
+                        debugInfo.userNonce = nonce.toString();
+                    } catch (e) {
+                        debugInfo.userNonce = `Error: ${e.message}`;
+                        recommendations.push('Contract nonces() function failed - check ABI or contract deployment');
+                    }
+                } else {
+                    debugInfo.contractName = 'Contract not found';
+                    debugInfo.contractSymbol = 'N/A';
+                    debugInfo.userNonce = 'N/A';
+                    recommendations.push('Contract not found at the specified address - verify deployment');
+                }
+
+                // Step 5: Check relayer
+                try {
+                    const response = await fetch(RELAYER_URL.replace('/relay-mint', '/health'), { 
+                        method: 'GET',
+                        timeout: 5000 
+                    });
+                    debugInfo.relayerAvailable = response.ok;
+                } catch (e) {
+                    debugInfo.relayerAvailable = false;
+                    recommendations.push('Relayer service unavailable - start your relayer server');
+                }
+
+                // Network recommendations
+                if (debugInfo.chainId !== '2046399126') {
+                    recommendations.push(`You're on chain ${debugInfo.chainId}. Somnia Devnet uses chain ID 2046399126`);
+                }
+
+                // Display results
+                displayResults(debugInfo);
+                displayRecommendations(recommendations);
+
+                loadingEl.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Debug error:', error);
+                loadingEl.classList.add('hidden');
+                errorContainer.classList.remove('hidden');
+                errorMessage.textContent = error.message;
+            }
+        }
+
+        function displayResults(debugInfo) {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+
+            const items = [
+                { label: 'Wallet Connection', value: debugInfo.walletConnected ? 'Connected' : 'Not Connected', status: debugInfo.walletConnected },
+                { label: 'User Address', value: debugInfo.userAddress || 'Not available', status: true },
+                { label: 'Network', value: `${debugInfo.network} (Chain ID: ${debugInfo.chainId})`, status: true },
+                { label: 'Contract Exists', value: debugInfo.contractExists ? 'Found' : 'Not Found', status: debugInfo.contractExists },
+                { label: 'Contract Name', value: debugInfo.contractName, status: !debugInfo.contractName?.includes('Error') },
+                { label: 'Contract Symbol', value: debugInfo.contractSymbol, status: debugInfo.contractSymbol !== 'N/A' },
+                { label: 'User Nonce', value: debugInfo.userNonce, status: !debugInfo.userNonce?.includes('Error') },
+                { label: 'Relayer Service', value: debugInfo.relayerAvailable ? 'Available' : 'Unavailable', status: debugInfo.relayerAvailable }
+            ];
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-4 bg-gray-800/50 rounded-lg';
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="${item.status ? 'status-good' : 'status-bad'}">${item.status ? '✓' : '✗'}</span>
+                        <span class="font-semibold">${item.label}</span>
+                    </div>
+                    <span class="${item.status ? 'status-good' : 'status-bad'} text-sm">${item.value}</span>
+                `;
+                results.appendChild(div);
+            });
+        }
+
+        function displayRecommendations(recommendations) {
+            const list = document.getElementById('recommendationsList');
+            list.innerHTML = '';
+            
+            if (recommendations.length === 0) {
+                list.innerHTML = '<div class="status-good">✓ All systems appear to be working correctly!</div>';
+                return;
+            }
+
+            recommendations.forEach(rec => {
+                const div = document.createElement('div');
+                div.textContent = `• ${rec}`;
+                list.appendChild(div);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('runDiagnostics').addEventListener('click', runDiagnostics);
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            console.log('Debug tool loaded. Click "Run Diagnostics" to start.');
+        });
+    </script>
+</body>
+</html>

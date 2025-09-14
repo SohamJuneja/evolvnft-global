@@ -1,0 +1,45 @@
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+# Private keys and secrets
+*.key
+*.pem
+private-keys/
+secrets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hardhat
+cache/
+artifacts/
+typechain-types/
+
+# Logs
+*.log
+logs/

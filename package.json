@@ -1,0 +1,55 @@
+{
+  "name": "evolvnft-backend",
+  "version": "1.0.0",
+  "description": "The smart contract and oracle backend for the EvolvNFT project.",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy.ts --network somniaTestnet",
+    "oracle": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:dev": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:prod": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:once": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:test": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:fast": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:single": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:target": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "mint": "npx hardhat run scripts/mint.ts --network somniaTestnet",
+    "test": "npx hardhat test"
+  },
+  "keywords": [
+    "nft",
+    "blockchain",
+    "solidity",
+    "somnia",
+    "onchain-impact"
+  ],
+  "author": "Soham Juneja",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": ">=9.1.0",
+    "@types/node": ">=18.0.0",
+    "chai": "^4.2.0",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.22.5",
+    "hardhat-gas-reporter": "^1.0.8",
+    "solidity-coverage": "^0.8.0",
+    "ts-node": ">=8.0.0",
+    "typechain": "^8.3.0",
+    "typescript": ">=4.5.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0",
+    "axios": "^1.12.1",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.7.0"
+  }
+}
