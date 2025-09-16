@@ -1,0 +1,16 @@
+# Railway Node.js deployment (Alternative to Docker)
+# This file configures Railway to deploy directly without Docker
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm run oracle:prod"
+healthcheckPath = "/"
+healthcheckTimeout = 30
+
+[variables]
+NODE_ENV = "production"
+EVOLUTION_INTERVAL_MINUTES = "5"
+MAX_TOKENS_PER_RUN = "10"
+SINGLE_RUN = "false"

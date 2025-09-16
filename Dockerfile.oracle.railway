@@ -1,0 +1,38 @@
+# Simplified Dockerfile for Railway deployment
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files first for better Docker layer caching
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install all dependencies (including dev dependencies for compilation)
+RUN npm install
+
+# Copy source code
+COPY contracts/ ./contracts/
+COPY scripts/ ./scripts/
+COPY hardhat.config.ts ./
+
+# Compile contracts to generate artifacts and typechain-types
+RUN npx hardhat compile
+
+# Remove dev dependencies to reduce image size (optional)
+# RUN npm prune --production
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S oracle -u 1001
+USER oracle
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV EVOLUTION_INTERVAL_MINUTES=5
+ENV MAX_TOKENS_PER_RUN=10
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=30s --start-period=10s --retries=3 \
+  CMD node -e "console.log('Oracle service is healthy')" || exit 1
+
+# Start the oracle
+CMD ["npx", "hardhat", "run", "scripts/oracle.ts", "--network", "somniaTestnet"]

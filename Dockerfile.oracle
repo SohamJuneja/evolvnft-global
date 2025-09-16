@@ -13,14 +13,12 @@ RUN npm ci --only=production
 # Copy source code
 COPY contracts/ ./contracts/
 COPY scripts/ ./scripts/
-COPY artifacts/ ./artifacts/
 COPY hardhat.config.ts ./
-COPY typechain-types/ ./typechain-types/
 
 # Install TypeScript and hardhat globally for runtime
 RUN npm install -g typescript ts-node hardhat
 
-# Compile contracts and generate types
+# Compile contracts and generate types (this will create artifacts and typechain-types)
 RUN npx hardhat compile
 
 # Create non-root user

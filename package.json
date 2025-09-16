@@ -8,14 +8,15 @@
     "deploy": "npx hardhat run scripts/deploy.ts --network somniaTestnet",
     "oracle": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "oracle:dev": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
-    "oracle:prod": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
+    "oracle:prod": "npx hardhat compile && npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "oracle:once": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "oracle:test": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "oracle:fast": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "oracle:single": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "oracle:target": "npx hardhat run scripts/oracle.ts --network somniaTestnet",
     "mint": "npx hardhat run scripts/mint.ts --network somniaTestnet",
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "start": "npm run oracle:prod"
   },
   "keywords": [
     "nft",
