@@ -38,7 +38,22 @@ console.log(`🔗 Connected to Contract: ${CONTRACT_ADDRESS}`);
 
 // --- API Endpoints ---
 app.get('/', (req, res) => {
-    res.send('EvolvNFT Relayer is running!');
+    res.json({
+        service: 'EvolvNFT Relayer',
+        status: 'running',
+        version: '1.0.0',
+        contract: CONTRACT_ADDRESS,
+        relayer: relayerWallet.address,
+        timestamp: new Date().toISOString()
+    });
+});
+
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
 });
 
 app.post('/relay-mint', async (req, res) => {

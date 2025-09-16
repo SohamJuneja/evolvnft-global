@@ -20,11 +20,16 @@
 
 ## 🎯 Deployment Checklist
 
-### ✅ Prerequisites
+### ✅ COMPLETED
 - [x] Smart Contract deployed on Somnia: `0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9`
-- [ ] Vercel account
-- [ ] Railway account
-- [ ] Render account (optional, for relayer)
+- [x] Frontend deployed (by user)
+- [x] Oracle deployed on Railway - Running perfectly!
+- [ ] Relayer service (optional for gasless minting)
+
+### 📋 ACCOUNTS NEEDED
+- [x] Vercel account (for frontend)
+- [x] Railway account (for oracle)
+- [ ] Render account (for relayer - optional)
 - [ ] Domain name (optional)
 
 ## 1. 🌐 Frontend Deployment (Vercel)

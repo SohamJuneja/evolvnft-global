@@ -4,8 +4,9 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/relayer.ts",
-    "dev": "ts-node --watch src/relayer.ts",
     "build": "tsc",
+    "postinstall": "npm run build",
+    "dev": "ts-node --watch src/relayer.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
