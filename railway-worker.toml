@@ -1,0 +1,16 @@
+# Railway configuration for Oracle Service (Background Worker)
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.oracle.railway"
+
+[deploy]
+# This is a background worker, not a web service
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[variables]
+NODE_ENV = "production"
+EVOLUTION_INTERVAL_MINUTES = "5"
+MAX_TOKENS_PER_RUN = "10"
+SINGLE_RUN = "false"
+PRIVATE_KEY = "${{PRIVATE_KEY}}"

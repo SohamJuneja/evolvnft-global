@@ -5,8 +5,9 @@ dockerfilePath = "Dockerfile.oracle.railway"
 
 [deploy]
 startCommand = "npx hardhat run scripts/oracle.ts --network somniaTestnet"
-healthcheckPath = "/"
-healthcheckTimeout = 30
+# Remove healthcheck for background worker
+# healthcheckPath = "/"
+# healthcheckTimeout = 30
 
 [variables]
 NODE_ENV = "production"
