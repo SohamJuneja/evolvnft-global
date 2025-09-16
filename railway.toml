@@ -1,0 +1,15 @@
+# Railway configuration for Oracle Service
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.oracle"
+
+[deploy]
+startCommand = "npx hardhat run scripts/oracle.ts --network somniaTestnet"
+healthcheckPath = "/"
+healthcheckTimeout = 10
+
+[variables]
+NODE_ENV = "production"
+EVOLUTION_INTERVAL_MINUTES = "5"
+MAX_TOKENS_PER_RUN = "10"
+SINGLE_RUN = "false"

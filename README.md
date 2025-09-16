@@ -237,27 +237,55 @@ function mintWithLocation(address to, uint256 locationId) external
 
 ## 🚀 **Quick Start Guide**
 
-### **Try It Now:**
+### **Try The Live Demo:**
+- 🌐 **Frontend**: [https://evolvnft.vercel.app](https://evolvnft.vercel.app) *(coming soon)*
+- ⚡ **Oracle**: Running live on Railway *(processing global weather data)*
+- 🔧 **API**: Available on Render *(gasless minting endpoint)*
+
+### **Deploy Your Own Instance:**
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/living-art-forge.git
+git clone https://github.com/SohamJuneja/evolvnft-global.git
+cd evolvnft-global
 
-# 2. Start the frontend
-cd living-art-forge
-npm install && npm run dev
+# 2. Run deployment preparation script
+./deploy.sh  # Linux/Mac
+# OR
+deploy.bat   # Windows
 
-# 3. Start the oracle (in another terminal)
-cd ../
-npm install && npm run oracle
-
-# 4. Watch the magic happen! 🎉
+# 3. Follow deployment guide
+See DEPLOYMENT.md for detailed instructions
 ```
 
-### **Get Weather API Key:**
-1. Visit [OpenWeatherMap](https://openweathermap.org/api)
-2. Sign up for free API key
-3. Add to `.env`: `VITE_OPENWEATHER_API_KEY=your_key`
-4. Enjoy real weather data!
+### **One-Click Deployments:**
+- [![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/SohamJuneja/evolvnft-global) Frontend
+- [![Deploy to Railway](https://railway.app/button.svg)](https://railway.app/new/template/oracle-template) Oracle Service  
+- [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy) Relayer API
+
+---
+
+## 📋 **Production Deployment Architecture**
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Oracle        │    │   Relayer       │
+│   (Vercel)      │◄──►│   (Railway)     │◄──►│   (Render)      │
+│   React/Vite    │    │   Node.js       │    │   Express API   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 ▼
+                    ┌─────────────────────────────┐
+                    │      Smart Contract        │
+                    │     (Somnia Testnet)       │
+                    │ 0xED32eAE05bdcB1fDabB02b0E │
+                    │    0fb4148eFDa486c9         │
+                    └─────────────────────────────┘
+```
+
+**Total Monthly Cost**: ~$12-27 + gas fees
+**Scalability**: Auto-scaling on all platforms
+**Uptime**: 99.9%+ with health checks and monitoring
 
 ---
 

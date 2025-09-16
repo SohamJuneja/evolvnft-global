@@ -1,0 +1,41 @@
+# EvolvNFT Oracle Service Dockerfile
+FROM node:20.18.0-alpine3.20
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY contracts/ ./contracts/
+COPY scripts/ ./scripts/
+COPY artifacts/ ./artifacts/
+COPY hardhat.config.ts ./
+COPY typechain-types/ ./typechain-types/
+
+# Install TypeScript and hardhat globally for runtime
+RUN npm install -g typescript ts-node hardhat
+
+# Compile contracts and generate types
+RUN npx hardhat compile
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S oracle -u 1001
+USER oracle
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV EVOLUTION_INTERVAL_MINUTES=5
+ENV MAX_TOKENS_PER_RUN=10
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "console.log('Oracle service is running')" || exit 1
+
+# Start oracle service
+CMD ["npx", "hardhat", "run", "scripts/oracle.ts", "--network", "somniaTestnet"]

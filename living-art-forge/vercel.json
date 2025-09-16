@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "VITE_CONTRACT_ADDRESS": "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9",
+    "VITE_CHAIN_ID": "50312",
+    "VITE_NETWORK_NAME": "Somnia Testnet"
+  }
+}
