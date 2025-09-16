@@ -28,12 +28,16 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545",
     },
     somniaTestnet: {
-      url: "https://50312.rpc.thirdweb.com",
+      url: process.env.SOMNIA_RPC_URL || "https://rpc.ankr.com/somnia_testnet/6d98f304a89a1bae8c99518de1733780853d152e34f4f110555e94c4514d47c8",
       chainId: 50312,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: 20000000000, // 20 gwei - higher gas price
       gas: 6000000, // Gas limit
       timeout: 60000, // 60 seconds timeout
+      // Add request throttling
+      httpHeaders: {
+        "User-Agent": "EvolvNFT-Oracle/1.0"
+      }
     },
   },
   paths: {

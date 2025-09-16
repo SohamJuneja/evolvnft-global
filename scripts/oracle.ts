@@ -86,7 +86,8 @@ async function main() {
                     try {
                         await evolveNFTWithLocationWeather(contract, tokenId, contractAddress, signer.provider);
                         // Add delay between transactions to avoid rate limiting
-                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        console.log(`   ⏳ Waiting 10 seconds before next NFT...`);
+                        await new Promise(resolve => setTimeout(resolve, 10000)); // 10 second delay
                     } catch (error) {
                         const errorMessage = error instanceof Error ? error.message : String(error);
                         console.error(`❌ Failed to evolve NFT #${tokenId}:`, errorMessage);

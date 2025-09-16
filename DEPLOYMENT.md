@@ -80,12 +80,19 @@ railway up
 ### Railway Environment Variables:
 ```
 NODE_ENV=production
-EVOLUTION_INTERVAL_MINUTES=5
-MAX_TOKENS_PER_RUN=10
+EVOLUTION_INTERVAL_MINUTES=10
+MAX_TOKENS_PER_RUN=5
 SINGLE_RUN=false
 PRIVATE_KEY=your_wallet_private_key
-SOMNIA_RPC_URL=https://50312.rpc.thirdweb.com
+SOMNIA_RPC_URL=https://rpc.ankr.com/somnia_testnet/6d98f304a89a1bae8c99518de1733780853d152e34f4f110555e94c4514d47c8
 ```
+
+**🔥 IMPORTANT: Use Dedicated RPC Provider**
+- **Alchemy** (Recommended): https://www.alchemy.com/
+- **Infura**: https://infura.io/
+- **QuickNode**: https://www.quicknode.com/
+
+Never use shared public RPCs for production - they have strict rate limits!
 
 ### Alternative: Render (Also Great for Oracle)
 ```bash
