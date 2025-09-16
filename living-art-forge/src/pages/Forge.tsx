@@ -8,7 +8,7 @@ import heroImage from '@/assets/hero-bg.jpg';
 
 // Configuration for gasless minting
 const RELAYER_URL = 'http://localhost:3001/relay-mint';
-const NEW_CONTRACT_ADDRESS = "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799";
+const NEW_CONTRACT_ADDRESS = "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 
 const contractABI = [
   {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
