@@ -7,14 +7,16 @@ async function main() {
   console.log("🎨 Minting Enhanced EvolvNFT...");
 
   // !!! IMPORTANT: UPDATE THIS WITH YOUR LATEST DEPLOYED CONTRACT ADDRESS !!!
-  const contractAddress = "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799";
+  const contractAddress = "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 
   const contractABI = [
     "function mint(address to) public",
+    "function mintWithLocation(address to, uint256 locationId) public", 
     "function tokenURI(uint256 tokenId) public view returns (string memory)",
     "function ownerOf(uint256 tokenId) public view returns (address)",
     "function balanceOf(address owner) public view returns (uint256)",
-    "function getTokenData(uint256 tokenId) public view returns (tuple(uint256 power, uint256 brightness, uint256 level, uint256 starlight, uint256 humidity, uint256 windSpeed, uint256 season, uint256 moonPhase))"
+    "function getTokenData(uint256 tokenId) public view returns (tuple(uint256 power, uint256 brightness, uint256 level, uint256 starlight, uint256 humidity, uint256 windSpeed, uint256 season, uint256 moonPhase, uint256 locationId))",
+    "function getTokenLocation(uint256 tokenId) public view returns (string)"
   ];
 
   try {
@@ -27,8 +29,10 @@ async function main() {
     const balanceBefore = Number(balanceBeforeBigInt);
     console.log("📊 Current NFT balance:", balanceBefore);
 
-    console.log("⏳ Minting NFT...");
-    const tx = await contract.mint(signer.address);
+    console.log("⏳ Minting NFT with location...");
+    // Mint with Delhi (locationId: 5) for testing  
+    const locationId = 5; // Delhi, India
+    const tx = await contract.mintWithLocation(signer.address, locationId);
     console.log("📝 Transaction hash:", tx.hash);
     
     const receipt = await tx.wait();
@@ -46,6 +50,8 @@ async function main() {
     try {
       console.log("\n🔍 Fetching NFT data...");
       const tokenURI = await contract.tokenURI(newTokenId);
+      const tokenLocation = await contract.getTokenLocation(newTokenId);
+      console.log("🌍 Location:", tokenLocation);
       
       if (tokenURI.startsWith('data:application/json;base64,')) {
         const base64Data = tokenURI.split(',')[1];

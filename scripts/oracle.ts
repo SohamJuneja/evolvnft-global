@@ -4,17 +4,11 @@ import axios from "axios";
 // Fixed Oracle that ensures contract address consistency
 async function main() {
     // CRITICAL: Make sure this matches your Collection.tsx contract address exactly
-    const contractAddress = "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799"; // Updated to match Collection.tsx
+    const contractAddress = "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9"; // Updated with location metadata
     
-    const contractABI = [
-        "function evolve(uint256 tokenId, uint256 newPower, uint256 newBrightness, uint256 newStarlight, uint256 newHumidity, uint256 newWindSpeed, uint256 newSeason, uint256 newMoonPhase) external",
-        "function getTokenData(uint256 tokenId) public view returns (tuple(uint256 power, uint256 brightness, uint256 level, uint256 starlight, uint256 humidity, uint256 windSpeed, uint256 season, uint256 moonPhase, uint256 locationId))",
-        "function getTokenLocation(uint256 tokenId) public view returns (string)",
-        "function ownerOf(uint256 tokenId) public view returns (address)",
-        "function totalSupply() public view returns (uint256)",
-        "function tokenURI(uint256 tokenId) public view returns (string)",
-        "function balanceOf(address owner) public view returns (uint256)"
-    ];
+    // Use the compiled contract ABI instead of manual definitions
+    const contractArtifact = require('../artifacts/contracts/EvolvNFT.sol/EvolvNFT.json');
+    const contractABI = contractArtifact.abi;
 
     // Connect to contract
     const [signer] = await ethers.getSigners();
@@ -52,7 +46,7 @@ async function main() {
             console.log(`⏰ ${new Date().toLocaleString()}`);
 
             // Get list of all minted NFTs with enhanced detection
-            let activeTokenIds = await getActiveTokenIdsEnhanced(contract);
+            let activeTokenIds = await getActiveTokenIdsEnhanced(contract, contractAddress, signer.provider);
             
             // Apply token selection strategy
             if (targetTokenId !== null) {
@@ -66,7 +60,7 @@ async function main() {
                 if (activeTokenIds.length < maxTokensPerRun && startIndex > 0) {
                     // Wrap around if needed
                     const remaining = maxTokensPerRun - activeTokenIds.length;
-                    const wrapped = await getActiveTokenIdsEnhanced(contract);
+                    const wrapped = await getActiveTokenIdsEnhanced(contract, contractAddress, signer.provider);
                     activeTokenIds = [...activeTokenIds, ...wrapped.slice(0, remaining)];
                 }
                 console.log(`📊 Limited to ${maxTokensPerRun} tokens this run: [${activeTokenIds.join(', ')}]`);
@@ -90,7 +84,7 @@ async function main() {
                 // Evolve each NFT with location-specific weather data
                 for (const tokenId of activeTokenIds) {
                     try {
-                        await evolveNFTWithLocationWeather(contract, tokenId);
+                        await evolveNFTWithLocationWeather(contract, tokenId, contractAddress, signer.provider);
                         // Add delay between transactions to avoid rate limiting
                         await new Promise(resolve => setTimeout(resolve, 2000));
                     } catch (error) {
@@ -133,8 +127,37 @@ const LOCATIONS = [
     { name: "Delhi, India", query: "Delhi,IN", timezone: "Asia/Kolkata" }
 ];
 
+// Helper function to decode token data manually due to ethers.js struct issues
+async function getTokenDataManually(contract: any, tokenId: number, provider: any, contractAddress: string) {
+    try {
+        const getTokenDataSelector = "0xb09afec1"; // keccak256("getTokenData(uint256)").slice(0, 10)
+        const tokenIdHex = ethers.zeroPadValue(ethers.toBeHex(tokenId), 32);
+        const calldata = getTokenDataSelector + tokenIdHex.slice(2);
+        
+        const result = await provider.call({
+            to: contractAddress,
+            data: calldata
+        });
+        
+        // Decode the result manually (9 uint256 values)
+        return {
+            power: parseInt(result.slice(2, 66), 16), // First 32 bytes  
+            brightness: parseInt(result.slice(66, 130), 16), // Second 32 bytes
+            level: parseInt(result.slice(130, 194), 16), // Third 32 bytes
+            starlight: parseInt(result.slice(194, 258), 16), // Fourth 32 bytes
+            humidity: parseInt(result.slice(258, 322), 16), // Fifth 32 bytes
+            windSpeed: parseInt(result.slice(322, 386), 16), // Sixth 32 bytes
+            season: parseInt(result.slice(386, 450), 16), // Seventh 32 bytes
+            moonPhase: parseInt(result.slice(450, 514), 16), // Eighth 32 bytes
+            locationId: parseInt(result.slice(514, 578), 16) // Ninth 32 bytes
+        };
+    } catch (error) {
+        throw new Error(`Failed to decode token data for token ${tokenId}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
 // Enhanced token detection with multiple strategies
-async function getActiveTokenIdsEnhanced(contract: any): Promise<number[]> {
+async function getActiveTokenIdsEnhanced(contract: any, contractAddress: string, provider: any): Promise<number[]> {
     try {
         const activeTokens: number[] = [];
         const maxCheck = 50; // Check more tokens
@@ -165,21 +188,24 @@ async function getActiveTokenIdsEnhanced(contract: any): Promise<number[]> {
             console.log("📊 No totalSupply function, scanning manually...");
             
             // Strategy 2: Manual scan
-            for (let i = 1; i <= maxCheck; i++) {
+            for (let i = 0; i <= maxCheck; i++) {
                 try {
                     const owner = await contract.ownerOf(i);
                     if (owner !== ethers.ZeroAddress) {
                         activeTokens.push(i);
                         console.log(`   ✅ Token #${i} - Owner: ${owner.slice(0, 10)}...${owner.slice(-8)}`);
                         
-                        // Also check if we can get token data and location
+                        // Also check if we can get token data and location  
                         try {
-                            const tokenData = await contract.getTokenData(i);
+                            // First try getTokenLocation which should work
                             const tokenLocation = await contract.getTokenLocation(i);
-                            console.log(`      📊 Current: Power ${tokenData.power}, Brightness ${tokenData.brightness}, Level ${tokenData.level}`);
-                            console.log(`      🌍 Location: ${tokenLocation} (ID: ${tokenData.locationId})`);
+                            console.log(`      🌍 Location: ${tokenLocation}`);
+                            
+                            // For token data, we'll skip the struct decoding for now
+                            // and get it later in the evolution process
+                            console.log(`      📊 Token data will be read during evolution`);
                         } catch (dataError) {
-                            console.log(`      ⚠️ Token data not accessible`);
+                            console.log(`      ⚠️ Token location not accessible: ${dataError instanceof Error ? dataError.message : String(dataError)}`);
                         }
                     }
                 } catch (error) {
@@ -248,12 +274,12 @@ async function getDynamicGasSettings(provider: any) {
 }
 
 // New function to evolve NFT with location-specific weather
-async function evolveNFTWithLocationWeather(contract: any, tokenId: number) {
+async function evolveNFTWithLocationWeather(contract: any, tokenId: number, contractAddress: string, provider: any) {
     try {
         console.log(`\n🎯 Evolving NFT #${tokenId}:`);
         
         // Get current token data including location
-        const currentData = await contract.getTokenData(tokenId);
+        const currentData = await getTokenDataManually(contract, tokenId, provider, contractAddress);
         const tokenLocation = await contract.getTokenLocation(tokenId);
         const locationId = Number(currentData.locationId);
         
@@ -328,7 +354,9 @@ async function evolveNFTSafely(
     tokenId: number, 
     weatherData: any, 
     timeData: any, 
-    astronomicalData: any
+    astronomicalData: any,
+    contractAddress: string,
+    provider: any
 ) {
     try {
         console.log(`\n🎯 Evolving NFT #${tokenId}:`);
@@ -336,7 +364,7 @@ async function evolveNFTSafely(
         // Pre-check 1: Verify token still exists and get current data
         let currentData;
         try {
-            currentData = await contract.getTokenData(tokenId);
+            currentData = await getTokenDataManually(contract, tokenId, provider, contractAddress);
             console.log(`   📊 Current - Power: ${currentData.power}, Level: ${currentData.level}, Brightness: ${currentData.brightness}`);
         } catch (error) {
             throw new Error(`Token #${tokenId} data not accessible: ${(error as Error).message}`);
@@ -431,7 +459,7 @@ async function evolveNFTSafely(
 
         // Post-check: Verify the evolution worked
         try {
-            const updatedData = await contract.getTokenData(tokenId);
+            const updatedData = await getTokenDataManually(contract, tokenId, provider, contractAddress);
             console.log(`   ✔️  Verified - Power: ${updatedData.power}, Brightness: ${updatedData.brightness}, Level: ${updatedData.level}`);
             
             // Check if values actually changed

@@ -182,7 +182,8 @@ contract EvolvNFT is ERC721, Ownable, EIP712 {
                         '{"trait_type": "Humidity", "value": ', Strings.toString(data.humidity), '},',
                         '{"trait_type": "Wind Speed", "value": ', Strings.toString(data.windSpeed), '},',
                         '{"trait_type": "Season", "value": "', _getSeasonName(data.season), '"},',
-                        '{"trait_type": "Moon Phase", "value": "', _getMoonPhaseName(data.moonPhase), '"}',
+                        '{"trait_type": "Moon Phase", "value": "', _getMoonPhaseName(data.moonPhase), '"},',
+                        '{"trait_type": "Location", "value": "', locationNames[data.locationId], '"}',
                     '],',
                     '"image": "data:image/svg+xml;base64,', image, '"}'
                 )
