@@ -18,11 +18,13 @@ COPY hardhat.config.ts ./
 # Compile contracts to generate artifacts and typechain-types
 RUN npx hardhat compile
 
-# Remove dev dependencies to reduce image size (optional)
-# RUN npm prune --production
-
-# Create non-root user for security
+# Create non-root user for security and set proper permissions
 RUN addgroup -g 1001 -S nodejs && adduser -S oracle -u 1001
+
+# Change ownership of the entire app directory to the oracle user
+RUN chown -R oracle:nodejs /app
+
+# Switch to oracle user after setting permissions
 USER oracle
 
 # Set environment variables

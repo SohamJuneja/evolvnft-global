@@ -1,7 +1,7 @@
 # Railway configuration for Oracle Service
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile.oracle.railway"
+dockerfilePath = "Dockerfile.oracle.simple"
 
 [deploy]
 startCommand = "npx hardhat run scripts/oracle.ts --network somniaTestnet"

@@ -1,0 +1,27 @@
+# Simple Dockerfile for Railway - No permission issues
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files first for better Docker layer caching
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install all dependencies
+RUN npm install
+
+# Copy source code
+COPY contracts/ ./contracts/
+COPY scripts/ ./scripts/
+COPY hardhat.config.ts ./
+
+# Compile contracts to generate artifacts and typechain-types
+RUN npx hardhat compile
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV EVOLUTION_INTERVAL_MINUTES=5
+ENV MAX_TOKENS_PER_RUN=10
+
+# Start the oracle (running as root to avoid permission issues)
+CMD ["npx", "hardhat", "run", "scripts/oracle.ts", "--network", "somniaTestnet"]
