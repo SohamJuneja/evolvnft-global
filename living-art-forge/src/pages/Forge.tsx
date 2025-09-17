@@ -7,8 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import heroImage from '@/assets/hero-bg.jpg';
 
 // Configuration for gasless minting
-const RELAYER_URL = 'http://localhost:3001/relay-mint';
-const NEW_CONTRACT_ADDRESS = "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
+const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:3001/relay-mint';
+const NEW_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 
 const contractABI = [
   {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},

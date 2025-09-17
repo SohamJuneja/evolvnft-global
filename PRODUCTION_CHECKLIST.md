@@ -115,7 +115,7 @@ Check your system health:
 railway logs
 
 # Check contract on explorer
-https://somnia-testnet.blockscout.com/address/0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9
+https://shannon-explorer.somnia.network/address/0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9
 
 # Test RPC endpoint
 curl -X POST https://rpc.ankr.com/somnia_testnet/YOUR_KEY \

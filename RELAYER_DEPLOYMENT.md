@@ -126,7 +126,7 @@ curl -X POST https://your-relayer.onrender.com/relay-mint \
 curl https://your-relayer.onrender.com/
 
 # Check wallet balance
-# Use block explorer: https://somnia-testnet.blockscout.com/address/YOUR_RELAYER_ADDRESS
+# Use block explorer: https://shannon-explorer.somnia.network/address/YOUR_RELAYER_ADDRESS
 ```
 
 ### Logs
@@ -165,7 +165,7 @@ curl -X POST https://rpc.ankr.com/somnia_testnet/YOUR_KEY \
   -d '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}'
 
 # Verify contract address
-https://somnia-testnet.blockscout.com/address/0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9
+https://shannon-explorer.somnia.network/address/0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9
 ```
 
 ## 🎯 Expected Results

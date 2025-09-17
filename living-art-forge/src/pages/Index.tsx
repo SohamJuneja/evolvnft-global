@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import LocationSelector from '@/components/LocationSelector';
 
 // --- Configuration ---
-const contractAddress = "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS || "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 const correctChainId = "50312";
 const blockExplorerUrl = "https://shannon-explorer.somnia.network";
 
