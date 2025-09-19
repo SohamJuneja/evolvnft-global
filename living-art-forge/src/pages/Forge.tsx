@@ -6,9 +6,12 @@ import { Sparkles, Zap, ArrowRight, Check, Loader2, AlertCircle, X } from 'lucid
 import { useToast } from '@/hooks/use-toast';
 import heroImage from '@/assets/hero-bg.jpg';
 
-// Configuration for gasless minting
-const RELAYER_URL = import.meta.env.VITE_RELAYER_URL || 'http://localhost:3001/relay-mint';
+// Configuration - Temporarily disable relayer for demo
+const RELAYER_URL = null; // Disabled - will use direct minting only
 const NEW_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
+
+// Relayer disabled for this demo
+const isRelayerAvailable = false;
 
 const contractABI = [
   {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
@@ -94,6 +97,12 @@ const Forge = () => {
 
   const handleGaslessMint = async () => {
     try {
+      // Check if relayer is available in production
+      if (import.meta.env.PROD && !import.meta.env.VITE_RELAYER_URL) {
+        showNotification('error', 'Gasless Minting Unavailable', 'Gasless minting is temporarily unavailable. Please use regular minting with MetaMask.');
+        return;
+      }
+
       setMintStatus('connecting');
       showNotification('info', 'Connecting Wallet', 'Please connect your wallet to continue...');
 
@@ -151,12 +160,31 @@ const Forge = () => {
 
       console.log('Sending to relayer:', relayPayload);
       
-      const response = await fetch(RELAYER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(relayPayload),
-      });
-
+      // Add timeout and better error handling for relayer request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      let response;
+      try {
+        response = await fetch(RELAYER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(relayPayload),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Relayer request timed out. The service may be unavailable.');
+        } else if (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('CONNECTION_REFUSED')) {
+          throw new Error('Relayer service is unavailable. Please try regular minting with MetaMask.');
+        }
+        throw fetchError;
+      }
+      
       console.log('Relayer response status:', response.status);
       
       if (!response.ok) {
@@ -194,6 +222,8 @@ const Forge = () => {
         errorMessage = "Account configuration issue. Please check if the relayer account is properly funded and configured.";
       } else if (error.message.includes('Relayer server error')) {
         errorMessage = `Server error: ${error.message}. Please check if the relayer service is running.`;
+      } else if (error.message.includes('Relayer service is unavailable')) {
+        errorMessage = "Gasless minting is temporarily unavailable. Please use regular minting with MetaMask.";
       } else if (error.code === -32603) {
         errorMessage = "Network error occurred. Please check your connection and try again.";
       }

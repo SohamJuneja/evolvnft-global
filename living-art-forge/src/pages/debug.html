@@ -58,8 +58,8 @@
     </div>
 
     <script>
-        // Configuration
-        const RELAYER_URL = 'http://localhost:3001/relay-mint';
+        // Configuration - Relayer disabled for demo
+        const RELAYER_URL = null; // 'http://localhost:3001/relay-mint' - DISABLED
         const NEW_CONTRACT_ADDRESS = "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799";
         
         const contractABI = [
@@ -137,16 +137,21 @@
                     recommendations.push('Contract not found at the specified address - verify deployment');
                 }
 
-                // Step 5: Check relayer
+                // Step 5: Check relayer (disabled for demo)
                 try {
-                    const response = await fetch(RELAYER_URL.replace('/relay-mint', '/health'), { 
-                        method: 'GET',
-                        timeout: 5000 
-                    });
-                    debugInfo.relayerAvailable = response.ok;
+                    if (RELAYER_URL) {
+                        const response = await fetch(RELAYER_URL.replace('/relay-mint', '/health'), { 
+                            method: 'GET',
+                            timeout: 5000 
+                        });
+                        debugInfo.relayerAvailable = response.ok;
+                    } else {
+                        debugInfo.relayerAvailable = false;
+                        recommendations.push('Relayer service disabled for demo - using direct minting only');
+                    }
                 } catch (e) {
                     debugInfo.relayerAvailable = false;
-                    recommendations.push('Relayer service unavailable - start your relayer server');
+                    recommendations.push('Relayer service unavailable - using direct minting only');
                 }
 
                 // Network recommendations

@@ -1,8 +1,12 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-verify"; // ** Import the verification plugin
 import "@typechain/hardhat";
 import "@nomicfoundation/hardhat-ethers";
 require('dotenv').config();
+
+// --- Securely get the private key from the .env file ---
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -17,42 +21,26 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: "typechain-types",
     target: "ethers-v6",
-    alwaysGenerateOverloads: false,
-    externalArtifacts: ["externalArtifacts/*.json"],
   },
   networks: {
     hardhat: {
       chainId: 31337,
     },
-    localhost: {
-      url: "http://127.0.0.1:8545",
-    },
     somniaTestnet: {
-      url: process.env.SOMNIA_RPC_URL || "https://rpc.ankr.com/somnia_testnet/6d98f304a89a1bae8c99518de1733780853d152e34f4f110555e94c4514d47c8",
+      url: process.env.SOMNIA_RPC_URL || "https://rpc.ankr.com/somnia_testnet/",
       chainId: 50312,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 20000000000, // 20 gwei - higher gas price
-      gas: 6000000, // Gas limit
-      timeout: 60000, // 60 seconds timeout
-      // Add request throttling
-      httpHeaders: {
-        "User-Agent": "EvolvNFT-Oracle/1.0"
-      }
+      accounts: PRIVATE_KEY ? [`0x${PRIVATE_KEY}`] : [],
     },
   },
-  paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts",
-  },
+  // ** Add the verification configuration block **
   etherscan: {
     apiKey: {
-      somniaTestnet: "your-api-key-here" // Not required for deployment
+      // The key MUST match the network name in the 'networks' object
+      somniaTestnet: "NO_API_KEY", // Blockscout explorers usually don't need a key
     },
     customChains: [
       {
-        network: "somniaTestnet",
+        network: "somniaTestnet", // Must match the network name above
         chainId: 50312,
         urls: {
           apiURL: "https://shannon-explorer.somnia.network/api",
@@ -60,7 +48,13 @@ const config: HardhatUserConfig = {
         }
       }
     ]
-  }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+  },
 };
 
 export default config;
