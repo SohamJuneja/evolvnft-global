@@ -95,6 +95,59 @@ const Forge = () => {
     setTimeout(() => setNotification(null), 5000); // Auto-close after 5 seconds
   };
 
+  const handleRegularMint = async () => {
+    try {
+      setMintStatus('connecting');
+      showNotification('info', 'Connecting Wallet', 'Please connect your wallet to continue...');
+
+      if (!window.ethereum) {
+        throw new Error('MetaMask is not installed. Please install MetaMask and try again.');
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      
+      setMintStatus('signing');
+      showNotification('info', 'Confirm Transaction', 'Please confirm the transaction in your wallet...');
+      
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+      
+      const contract = new ethers.Contract(NEW_CONTRACT_ADDRESS, contractABI, signer);
+      
+      // Call regular mint function
+      const tx = await contract.mint(address);
+      setTxHash(tx.hash);
+      
+      setMintStatus('relaying');
+      showNotification('info', 'Transaction Submitted', 'Your mint transaction is being processed...');
+      
+      const receipt = await tx.wait();
+      
+      if (receipt.status === 1) {
+        setMintStatus('success');
+        showNotification('success', 'NFT Minted Successfully!', `Your living NFT has been created! It will begin evolving shortly.`);
+      } else {
+        throw new Error('Transaction failed during execution.');
+      }
+      
+    } catch (error: any) {
+      console.error('Regular mint error:', error);
+      let errorMessage = "An unexpected error occurred during minting.";
+      
+      if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+        errorMessage = "Transaction was cancelled. Please try again when you're ready to mint.";
+      } else if (error.message.includes('insufficient funds')) {
+        errorMessage = "Insufficient funds to pay for gas. Please add some ETH to your wallet.";
+      } else if (error.message.includes('MetaMask')) {
+        errorMessage = error.message;
+      }
+      
+      setMintStatus('idle');
+      showNotification('error', 'Minting Failed', errorMessage);
+    }
+  };
+
   const handleGaslessMint = async () => {
     try {
       // Check if relayer is available in production
@@ -337,13 +390,13 @@ const Forge = () => {
             <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
               Welcome to the Cyber Foundry, where your NFTs are born with life itself. 
               Each asset evolves in real-time, powered by on-chain generation and oracle data.
-              <span className="block mt-2 text-lg text-secondary font-semibold">Now with gasless minting - your first NFT is on us!</span>
+              <span className="block mt-2 text-lg text-secondary font-semibold">Mint your living NFT on Somnia's ultra-fast blockchain!</span>
             </p>
             
             {/* CTA Button */}
             <div className="space-y-4">
               <button
-                onClick={mintStatus === 'success' ? resetMint : handleGaslessMint}
+                onClick={mintStatus === 'success' ? resetMint : handleRegularMint}
                 disabled={['connecting', 'signing', 'relaying'].includes(mintStatus)}
                 className="forge-btn flex items-center space-x-3 mx-auto min-w-[320px] justify-center"
               >
@@ -386,9 +439,9 @@ const Forge = () => {
               <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 group-hover:animate-living-pulse">
                 <Sparkles className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">Forge (Gasless)</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">Forge Your NFT</h3>
               <p className="text-muted-foreground">
-                Mint your NFT with unique DNA generated 100% on-chain. No IPFS, no external storage, no gas fees.
+                Mint your NFT with unique DNA generated 100% on-chain. No IPFS, no external storage. Pay a small gas fee on Somnia's efficient network.
               </p>
             </div>
             
