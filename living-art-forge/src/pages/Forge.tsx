@@ -11,7 +11,7 @@ import heroImage from '@/assets/hero-bg.jpg';
               Welcome to the Cyber Foundry, where your NFTs are born with life itself. 
               Each asset evolves in real-time, powered by on-chain generation and oracle data.
               <span className="block mt-2 text-lg text-secondary font-semibold">Mint your living NFT on Somnia's ultra-fast blockchain!</span>
-            </p>er relayer
+            </p>
 const RELAYER_URL = 'https://evolvnft-global-relayer.onrender.com/relay-mint';
 const NEW_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 
