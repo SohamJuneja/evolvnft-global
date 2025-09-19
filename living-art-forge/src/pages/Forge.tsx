@@ -212,6 +212,7 @@ const Forge = () => {
       };
 
       console.log('Sending to relayer:', relayPayload);
+      console.log('Relayer URL:', RELAYER_URL);
       
       // Add timeout and better error handling for relayer request
       const controller = new AbortController();
@@ -221,7 +222,10 @@ const Forge = () => {
       try {
         response = await fetch(RELAYER_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify(relayPayload),
           signal: controller.signal
         });
@@ -401,6 +405,16 @@ const Forge = () => {
                 className="forge-btn flex items-center space-x-3 mx-auto min-w-[320px] justify-center"
               >
                 {getMintButtonContent()}
+              </button>
+              
+              {/* Backup Regular Minting Button */}
+              <button
+                onClick={handleRegularMint}
+                disabled={['connecting', 'signing', 'relaying'].includes(mintStatus)}
+                className="bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/50 px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 mx-auto"
+              >
+                <Zap className="w-5 h-5" />
+                <span>Regular Mint (Pay Gas)</span>
               </button>
               
               {txHash && (

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Relayer Test</title>
+</head>
+<body>
+    <h2>EvolvNFT Relayer Test</h2>
+    <button onclick="testRelayer()">Test Relayer Connection</button>
+    <div id="result"></div>
+
+    <script>
+        async function testRelayer() {
+            const resultDiv = document.getElementById('result');
+            try {
+                resultDiv.innerHTML = 'Testing...';
+                
+                const response = await fetch('https://evolvnft-global-relayer.onrender.com/', {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h3>✅ Relayer is Working!</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3>❌ Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
