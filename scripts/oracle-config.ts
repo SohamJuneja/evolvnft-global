@@ -32,8 +32,8 @@ export const defaultConfig: OracleConfig = {
     contractAddress: "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799", // UPDATE THIS
     networkName: "somniaTestnet",
     
-    // Oracle behavior - evolution every 5 minutes
-    evolutionInterval: 5 * 60 * 1000, // 5 minutes
+    // Oracle behavior - evolution every 30 seconds for demo
+    evolutionInterval: 30 * 1000, // 30 seconds for video demo
     retryDelay: 30 * 1000, // 30 seconds
     maxRetries: 3,
     transactionDelay: 2000, // 2 seconds between transactions

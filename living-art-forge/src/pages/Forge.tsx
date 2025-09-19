@@ -6,7 +6,12 @@ import { Sparkles, Zap, ArrowRight, Check, Loader2, AlertCircle, X } from 'lucid
 import { useToast } from '@/hooks/use-toast';
 import heroImage from '@/assets/hero-bg.jpg';
 
-// Configuration - Use working Render relayer
+// Configuration - Use workin            {/* Subtitle */}
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+              Welcome to the Cyber Foundry, where your NFTs are born with life itself. 
+              Each asset evolves in real-time, powered by on-chain generation and oracle data.
+              <span className="block mt-2 text-lg text-secondary font-semibold">Mint your living NFT on Somnia's ultra-fast blockchain!</span>
+            </p>er relayer
 const RELAYER_URL = 'https://evolvnft-global-relayer.onrender.com/relay-mint';
 const NEW_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 
@@ -394,27 +399,17 @@ const Forge = () => {
             <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
               Welcome to the Cyber Foundry, where your NFTs are born with life itself. 
               Each asset evolves in real-time, powered by on-chain generation and oracle data.
-              <span className="block mt-2 text-lg text-secondary font-semibold">Now with gasless minting - your first NFT is on us!</span>
+              <span className="block mt-2 text-lg text-secondary font-semibold">Mint your living NFT on Somnia's ultra-fast blockchain!</span>
             </p>
             
             {/* CTA Button */}
             <div className="space-y-4">
               <button
-                onClick={mintStatus === 'success' ? resetMint : handleGaslessMint}
+                onClick={mintStatus === 'success' ? resetMint : handleRegularMint}
                 disabled={['connecting', 'signing', 'relaying'].includes(mintStatus)}
                 className="forge-btn flex items-center space-x-3 mx-auto min-w-[320px] justify-center"
               >
                 {getMintButtonContent()}
-              </button>
-              
-              {/* Backup Regular Minting Button */}
-              <button
-                onClick={handleRegularMint}
-                disabled={['connecting', 'signing', 'relaying'].includes(mintStatus)}
-                className="bg-secondary/20 hover:bg-secondary/30 text-secondary border border-secondary/50 px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 mx-auto"
-              >
-                <Zap className="w-5 h-5" />
-                <span>Regular Mint (Pay Gas)</span>
               </button>
               
               {txHash && (
@@ -453,9 +448,9 @@ const Forge = () => {
               <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6 group-hover:animate-living-pulse">
                 <Sparkles className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">Forge (Gasless)</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-4">Forge Your NFT</h3>
               <p className="text-muted-foreground">
-                Mint your NFT with unique DNA generated 100% on-chain. No IPFS, no external storage, no gas fees.
+                Mint your NFT with unique DNA generated 100% on-chain. No IPFS, no external storage. Small gas fee on Somnia's efficient network.
               </p>
             </div>
             
