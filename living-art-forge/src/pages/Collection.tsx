@@ -311,6 +311,14 @@ const Collection = () => {
           <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
             #{nft.tokenId}
           </div>
+          
+          {/* Location Badge */}
+          {nft.locationName && (
+            <div className="absolute bottom-16 left-4 bg-blue-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+              🌍 {nft.locationName.split(',')[0]}
+            </div>
+          )}
+          
           {weatherData && (
             <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs">
               🌡️ {weatherData.temperature}°C
@@ -337,6 +345,15 @@ const Collection = () => {
         {/* NFT Info */}
         <div className="p-6">
           <h3 className="text-xl font-bold text-foreground mb-2">{nft.name}</h3>
+          
+          {/* Location Badge */}
+          {nft.locationName && (
+            <div className="mb-3">
+              <span className="inline-flex items-center bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+                🌍 {nft.locationName}
+              </span>
+            </div>
+          )}
           
           {/* Quick Stats Row */}
           <div className="grid grid-cols-3 gap-2 mb-4">
@@ -420,6 +437,16 @@ const Collection = () => {
                 <h2 className="text-2xl font-bold text-foreground mb-2">
                   {selectedNFT.name}
                 </h2>
+                
+                {/* Location Information */}
+                {selectedNFT.locationName && (
+                  <div className="mb-4">
+                    <div className="inline-flex items-center bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium">
+                      🌍 Connected to {selectedNFT.locationName}
+                    </div>
+                  </div>
+                )}
+                
                 <p className="text-muted-foreground mb-4">
                   A dynamic, living asset evolving with real-world conditions on the Somnia Network.
                 </p>
@@ -427,13 +454,16 @@ const Collection = () => {
                 {weatherData && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                     <h4 className="font-semibold text-blue-800 dark:text-blue-400 mb-2">
-                      🌍 Current Weather Conditions
+                      🌍 Current Weather in {selectedNFT.locationName || 'Connected City'}
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-sm text-blue-700 dark:text-blue-300">
                       <div>🌡️ Temperature: {weatherData.temperature}°C</div>
                       <div>💧 Humidity: {weatherData.humidity}%</div>
                       <div>💨 Wind: {weatherData.windSpeed} m/s</div>
                       <div>☁️ Weather: {weatherData.description}</div>
+                    </div>
+                    <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                      Your NFT evolves based on live data from this location
                     </div>
                   </div>
                 )}

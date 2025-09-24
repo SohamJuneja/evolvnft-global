@@ -203,10 +203,96 @@ class EvolutionService {
       } catch (error) {
         console.warn('Could not load evolution history from localStorage:', error);
       }
-      return [];
+      
+      // Generate demo evolution history if none exists (for demo purposes)
+      this.generateDemoHistory(tokenId);
+      return this.historyStorage.get(tokenId) || [];
     }
     
     return this.historyStorage.get(tokenId) || [];
+  }
+  
+  // Generate demo evolution history for newly minted NFTs
+  private generateDemoHistory(tokenId: number) {
+    const now = Date.now();
+    const demoEntries: EvolutionHistoryEntry[] = [];
+    
+    // Create 3-5 demo evolution entries spanning the last few hours
+    const numEntries = Math.floor(Math.random() * 3) + 3; // 3-5 entries
+    
+    for (let i = 0; i < numEntries; i++) {
+      const timeAgo = (numEntries - i) * 45 * 60 * 1000; // 45 minutes between each
+      const timestamp = now - timeAgo;
+      
+      // Generate realistic trait progression
+      const baseLevel = i + 1;
+      const basePower = 100 + (i * 25) + Math.floor(Math.random() * 20);
+      const baseBrightness = 50 + (i * 15) + Math.floor(Math.random() * 15);
+      
+      const oldTraits = {
+        level: i === 0 ? 1 : baseLevel - 1,
+        power: i === 0 ? 75 : basePower - 25,
+        brightness: i === 0 ? 35 : baseBrightness - 15,
+        starlight: 20 + Math.floor(Math.random() * 30),
+        humidity: 40 + Math.floor(Math.random() * 30),
+        windSpeed: 5 + Math.floor(Math.random() * 15)
+      };
+      
+      const newTraits = {
+        level: baseLevel,
+        power: basePower,
+        brightness: baseBrightness,
+        starlight: 25 + Math.floor(Math.random() * 30),
+        humidity: 45 + Math.floor(Math.random() * 25),
+        windSpeed: 8 + Math.floor(Math.random() * 12)
+      };
+      
+      // Generate realistic weather conditions
+      const temperatures = [18, 22, 26, 20, 24];
+      const conditions = ['clear', 'partly cloudy', 'cloudy', 'light rain', 'sunny'];
+      const weatherConditions: WeatherData = {
+        temperature: temperatures[i % temperatures.length],
+        humidity: newTraits.humidity,
+        windSpeed: newTraits.windSpeed,
+        description: conditions[i % conditions.length],
+        visibility: 10,
+        pressure: 1013,
+        timezone: "Asia/Tokyo",
+        sunrise: timestamp - (6 * 60 * 60 * 1000),
+        sunset: timestamp + (6 * 60 * 60 * 1000)
+      };
+      
+      demoEntries.push({
+        timestamp,
+        oldTraits,
+        newTraits,
+        weatherConditions,
+        trigger: i === 0 ? 'Initial mint' : this.determineTrigger(
+          oldTraits as EvolvNFT, 
+          newTraits as EvolvNFT, 
+          weatherConditions
+        )
+      });
+    }
+    
+    this.historyStorage.set(tokenId, demoEntries);
+    
+    // Store demo history in localStorage
+    try {
+      localStorage.setItem(`evolution_history_${tokenId}`, JSON.stringify(demoEntries));
+      localStorage.setItem(`demo_history_${tokenId}`, 'true'); // Mark as demo data
+    } catch (error) {
+      console.warn('Could not save demo evolution history:', error);
+    }
+  }
+  
+  // Check if history is demo data
+  isDemoHistory(tokenId: number): boolean {
+    try {
+      return localStorage.getItem(`demo_history_${tokenId}`) === 'true';
+    } catch {
+      return false;
+    }
   }
   
   // Calculate evolution statistics

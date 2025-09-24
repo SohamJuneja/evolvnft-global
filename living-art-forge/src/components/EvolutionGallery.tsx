@@ -12,13 +12,16 @@ const EvolutionGallery: React.FC<EvolutionGalleryProps> = ({ nft, onClose }) => 
   const [history, setHistory] = useState<EvolutionHistoryEntry[]>([]);
   const [stats, setStats] = useState<EvolutionStats | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<EvolutionHistoryEntry | null>(null);
+  const [isDemoData, setIsDemoData] = useState(false);
 
   useEffect(() => {
     const historyData = evolutionService.getEvolutionHistory(nft.tokenId);
     const statsData = evolutionService.getEvolutionStats(nft.tokenId);
+    const isDemo = evolutionService.isDemoHistory(nft.tokenId);
     
     setHistory(historyData);
     setStats(statsData);
+    setIsDemoData(isDemo);
   }, [nft.tokenId]);
 
   const formatTimeAgo = (timestamp: number) => {

@@ -1,22 +1,18 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import Header from '@/components/Header';
+import LocationSelector from '@/components/LocationSelector';
 import { connectWallet, getContract } from '@/lib/blockchain';
 import { Sparkles, Zap, ArrowRight, Check, Loader2, AlertCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import heroImage from '@/assets/hero-bg.jpg';
 
-// Configuration - Use workin            {/* Subtitle */}
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-              Welcome to the Cyber Foundry, where your NFTs are born with life itself. 
-              Each asset evolves in real-time, powered by on-chain generation and oracle data.
-              <span className="block mt-2 text-lg text-secondary font-semibold">Mint your living NFT on Somnia's ultra-fast blockchain!</span>
-            </p>
-const RELAYER_URL = 'https://evolvnft-global-relayer.onrender.com/relay-mint';
+// Configuration - Regular minting only for demo
+const RELAYER_URL = null; // Disabled for demo
 const NEW_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9";
 
-// Relayer is available since it's working on Render
-const isRelayerAvailable = true;
+// Relayer disabled for clean demo
+const isRelayerAvailable = false;
 
 const contractABI = [
   {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
@@ -31,6 +27,9 @@ const contractABI = [
   {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},
+  {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"mintFor","outputs":[],"stateMutability":"nonpayable","type":"function"},
+  {"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},
+  {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"locationId","type":"uint256"}],"name":"mintWithLocation","outputs":[],"stateMutability":"nonpayable","type":"function"},
   {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"signature","type":"bytes"}],"name":"mintFor","outputs":[],"stateMutability":"nonpayable","type":"function"},
   {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"nonces","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
@@ -87,6 +86,7 @@ const Notification = ({ type, title, message, onClose }: NotificationProps) => {
 
 const Forge = () => {
   const [mintStatus, setMintStatus] = useState<MintStatus>('idle');
+  const [selectedLocation, setSelectedLocation] = useState<number>(3); // Default to Tokyo
   const [txHash, setTxHash] = useState<string>('');
   const [notification, setNotification] = useState<{
     type: 'info' | 'success' | 'error';
@@ -109,8 +109,14 @@ const Forge = () => {
         throw new Error('MetaMask is not installed. Please install MetaMask and try again.');
       }
 
+      // Add delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
+      
+      // Small delay before next operation
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       setMintStatus('signing');
       showNotification('info', 'Confirm Transaction', 'Please confirm the transaction in your wallet...');
@@ -120,8 +126,11 @@ const Forge = () => {
       
       const contract = new ethers.Contract(NEW_CONTRACT_ADDRESS, contractABI, signer);
       
-      // Call regular mint function
-      const tx = await contract.mint(address);
+      // Call mintWithLocation function with selected location
+      const estimatedGas = await contract.mintWithLocation.estimateGas(address, selectedLocation);
+      const tx = await contract.mintWithLocation(address, selectedLocation, {
+        gasLimit: estimatedGas + 20000n // Add buffer
+      });
       setTxHash(tx.hash);
       
       setMintStatus('relaying');
@@ -131,7 +140,7 @@ const Forge = () => {
       
       if (receipt.status === 1) {
         setMintStatus('success');
-        showNotification('success', 'NFT Minted Successfully!', `Your living NFT has been created! It will begin evolving shortly.`);
+        showNotification('success', 'NFT Minted Successfully!', `Your living NFT has been created! It will begin evolving in 30 seconds.`);
       } else {
         throw new Error('Transaction failed during execution.');
       }
@@ -144,6 +153,8 @@ const Forge = () => {
         errorMessage = "Transaction was cancelled. Please try again when you're ready to mint.";
       } else if (error.message.includes('insufficient funds')) {
         errorMessage = "Insufficient funds to pay for gas. Please add some ETH to your wallet.";
+      } else if (error.message.includes('rate limit') || error.code === -32005) {
+        errorMessage = "Rate limit reached. Please wait a moment and try again.";
       } else if (error.message.includes('MetaMask')) {
         errorMessage = error.message;
       }
@@ -403,7 +414,17 @@ const Forge = () => {
             </p>
             
             {/* CTA Button */}
-            <div className="space-y-4">
+            <div className="space-y-8">
+              {/* Location Selector */}
+              <div className="max-w-lg mx-auto">
+                <LocationSelector
+                  selectedLocation={selectedLocation}
+                  onLocationChange={setSelectedLocation}
+                  disabled={['connecting', 'signing', 'relaying'].includes(mintStatus)}
+                />
+              </div>
+
+              {/* Mint Button */}
               <button
                 onClick={mintStatus === 'success' ? resetMint : handleRegularMint}
                 disabled={['connecting', 'signing', 'relaying'].includes(mintStatus)}

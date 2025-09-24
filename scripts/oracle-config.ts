@@ -28,8 +28,8 @@ export interface OracleConfig {
 
 // Default configuration
 export const defaultConfig: OracleConfig = {
-    // Contract settings
-    contractAddress: "0xf75F1Ab3b191CCC5e0A485E4C791243A5A3ec799", // UPDATE THIS
+    // Contract settings - Use the same contract as frontend
+    contractAddress: "0xED32eAE05bdcB1fDabB02b0E0fb4148eFDa486c9", // Same as frontend
     networkName: "somniaTestnet",
     
     // Oracle behavior - evolution every 30 seconds for demo

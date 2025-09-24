@@ -212,6 +212,8 @@ export interface EvolvNFT {
   windSpeed?: number;
   season?: number;
   moonPhase?: number;
+  locationId?: number;
+  locationName?: string;
   owner: string;
   attributes?: Array<{
     trait_type: string;
@@ -358,6 +360,52 @@ export const getTokenDataFromContract = async (
     const tokenURI = await contract.tokenURI(tokenId);
     const owner = await contract.ownerOf(tokenId);
     
+    // Get location data
+    let locationId: number | undefined;
+    let locationName: string | undefined;
+    try {
+      // Check if the function exists before calling it
+      if (contract.getTokenLocation) {
+        const locationResult = await contract.getTokenLocation(tokenId);
+        console.log('Raw location result:', locationResult);
+        
+        // The function returns a location name string, not an ID
+        locationName = locationResult;
+        
+        // Map location name back to ID for consistency
+        const locationMap = [
+          "San Francisco, CA",    // 0
+          "New York, NY",         // 1
+          "London, UK",           // 2
+          "Tokyo, Japan",         // 3
+          "Bengaluru, India",     // 4
+          "Delhi, India"          // 5
+        ];
+        
+        locationId = locationMap.findIndex(name => name === locationName);
+        if (locationId === -1) {
+          console.warn('Unknown location name received:', locationName);
+          locationId = 3; // Default to Tokyo
+          locationName = "Tokyo, Japan";
+        }
+        
+        console.log('Parsed location:', { locationId, locationName });
+        
+      } else {
+        console.warn('getTokenLocation function not available in contract, using default location');
+        // If the function doesn't exist, use the selectedLocation from the mint process
+        // For now, default to Tokyo
+        locationId = 3;
+        locationName = "Tokyo, Japan";
+      }
+      
+    } catch (locationError) {
+      console.warn('Could not fetch location data:', locationError);
+      // Default to Tokyo if location fetch fails
+      locationId = 3;
+      locationName = "Tokyo, Japan";
+    }
+    
     // Parse metadata for name and image
     let metadata = null;
     try {
@@ -391,6 +439,8 @@ export const getTokenDataFromContract = async (
       windSpeed: Number(tokenData.windSpeed) || 0,
       season: Number(tokenData.season) || 0,
       moonPhase: Number(tokenData.moonPhase) || 0,
+      locationId: locationId,
+      locationName: locationName,
       owner: owner || '',
       attributes: metadata?.attributes || [],
     };
